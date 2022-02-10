@@ -32,7 +32,7 @@ pipeline {
         stage('deploy to target') {
            
             steps {
-                sh 'sfdx auth:jwt:grant -u daniel-8299053017-25@industryapps.com -f ${PRIVATE_KEY} -i ${CLIENT_ID_DEV} -r https://login.salesforce.com -a targetOrg'
+                sh 'sfdx auth:jwt:grant -u ${SF_USERNAME_DEV} -f ${PRIVATE_KEY} -i ${CLIENT_ID_DEV} -r https://login.salesforce.com -a targetOrg'
                 sh 'sfdx force:org:display -u ${SF_USERNAME_DEV}'
                 echo "Checking out repository..."
                 checkout scm
@@ -41,12 +41,12 @@ pipeline {
                 script {
                     echo "Creating delta packages"
                     //Create delta SF Folder
-                    sh 'sfdx sgd:source:delta --to HEAD --from HEAD^ --output .'
+                    sh 'sfdx sgd:source:delta  --to HEAD --from HEAD^ --output .'
                     sh 'ls -la'
                     echo "Deploying delta"
-                    sh 'sfdx force:source:deploy -x package/package.xml '
+                    sh 'sfdx force:source:deploy -u ${SF_USERNAME_DEV} -x package/package.xml '
                     echo "Deploying delta"
-                    sh 'sfdx force:mdapi:deploy -d destructiveChanges  --ignorewarnings'
+                    sh 'sfdx force:mdapi:deploy -u ${SF_USERNAME_DEV} -d destructiveChanges  --ignorewarnings'
                    
                     
                         sh 'echo "###DONE!!"'
