@@ -1,0 +1,16 @@
+{
+    "packageDirectories": [
+        {
+            "path": "salesforce_sfdx",
+            "default": true,
+            "package": "test",
+            "versionNumber": "1.0.0.0",
+            "dependencies": [{
+                "package": "Vlocity CMT"
+            }]
+        }
+    ],
+    "namespace": "",
+    "sfdcLoginUrl": "https://login.salesforce.com",
+    "sourceApiVersion": "54.0"
+}

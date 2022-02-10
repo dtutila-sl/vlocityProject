@@ -1,0 +1,77 @@
+pipeline {
+    agent {                                                             
+        label 'SFBLD'
+    }
+    environment {
+        SF_USERNAME_DEV = 'daniel-8299053017-25@industryapps.com'
+        PRIVATE_KEY = credentials('SERVER_KEY_CREDENTALS_ID')
+        CLIENT_ID_DEV = credentials('SF_CLIENT_ID_DEV')
+        SF_LOGIN_QA = 'https://login.salesforce.com'
+        SF_DEV_PSW = credentials('SF_LOGIN_DEV_PSW')
+    }
+    options {
+        disableConcurrentBuilds()
+        buildDiscarder(logRotator(numToKeepStr: '3'))
+        skipDefaultCheckout()
+        timeout(time: 120, unit: 'MINUTES')
+    }
+    stages {                                                           
+        stage('Print Environment') {
+            steps {
+              
+                 echo "Checking environment"
+                 sh """
+                 whoami
+                 pwd
+                 uname -a
+                 ls
+                 sfdx version
+                 """
+            }
+        }
+        stage('deploy to target') {
+  
+            steps {
+                sh 'sfdx auth:jwt:grant -u daniel-8299053017-25@industryapps.com -f ${PRIVATE_KEY} -i ${CLIENT_ID_DEV} -r https://login.salesforce.com -a targetOrg'
+                echo "Checking out repository..."
+                checkout scm
+                sh 'tree'
+                echo "Deploying ..."
+                script {
+                    // Remove old SF Delta Folder
+                    if (fileExists('salesforce_sfdx_delta')) {
+                        sh 'rm -rf salesforce_sfdx_delta'
+                    } 
+                    //Create delta SF Folder
+                    sh 'sfdx vlocityestools:sfsource:createdeltapackage -u ${SF_USERNAME_DEV} -p cmt -d salesforce_sfdx'
+                    sh 'ls -la'
+                    // SF Metadata Deploy - Only if delta Package Exits
+                    if (fileExists('salesforce_sfdx_delta')) {
+                        sh 'echo "### SF DELTA-FOLDER FOUND - Deploying deltas..."'
+                        sh 'sfdx force:source:deploy --sourcepath salesforce_sfdx_delta --targetusername ${SF_USERNAME_DEV} --verbose'
+                    } else {
+                        sh 'echo "### NO SF DELTA-FOLDER FOUND"'
+                    }
+                }
+                sh 'sfdx force:org:display -u ${SF_USERNAME_DEV}'
+                sh 'echo "sf.username=${SF_USERNAME_DEV}\n" > build.properties'
+                sh 'echo "sf.password=${SF_DEV_PSW}\n" >> build.properties'
+                sh 'echo "sf.loginUrl=https://login.salesforce.com\n" >> build.properties'
+                sh 'echo "ignoreLWCActivationCards=true\n" >> build.properties'
+                sh 'cat build.properties'
+                sh 'vlocity -propertyfile build.properties -job ./Deploy_Delta.yaml packDeploy --verbose true --simpleLogging true'
+            }
+        }
+
+       
+    }
+    post {
+        always {
+            echo 'cleaning up the workspace after build.....'
+
+                    deleteDir()
+ 
+        }
+      
+    }
+}
