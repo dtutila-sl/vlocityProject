@@ -4,7 +4,8 @@
     "%vlocity_namespace%__ElementTypeToHTMLTemplateList__c": "{\"ElementTypeToHTMLTemplateList\":[]}",
     "%vlocity_namespace%__Element__c": [
         "jenkins_test_English_Element_Step1.json",
-        "jenkins_test_English_Element_TextBlock1.json"
+        "jenkins_test_English_Element_TextBlock1.json",
+        "jenkins_test_English_Element_TextBlock2.json"
     ],
     "%vlocity_namespace%__IsLwcEnabled__c": true,
     "%vlocity_namespace%__IsProcedure__c": false,
