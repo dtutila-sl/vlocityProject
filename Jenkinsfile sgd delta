@@ -39,20 +39,18 @@ pipeline {
                 sh 'tree'
                 echo "Deploying ..."
                 script {
-                    // Remove old SF Delta Folder
-                    if (fileExists('salesforce_sfdx_delta')) {
-                        sh 'rm -rf salesforce_sfdx_delta'
-                    } 
+                    echo "Creating delta packages"
                     //Create delta SF Folder
-                    sh 'sfdx vlocityestools:sfsource:createdeltapackage -u ${SF_USERNAME_DEV} -p cmt -d salesforce_sfdx'
+                    sh 'sfdx sgd:source:delta  --to HEAD --from HEAD^ --output .'
                     sh 'ls -la'
-                    // SF Metadata Deploy - Only if delta Package Exits
-                    if (fileExists('salesforce_sfdx_delta')) {
-                        sh 'echo "### SF DELTA-FOLDER FOUND - Deploying deltas..."'
-                        sh 'sfdx force:source:deploy --sourcepath salesforce_sfdx_delta --targetusername ${SF_USERNAME_DEV} --verbose'
-                    } else {
-                        sh 'echo "### NO SF DELTA-FOLDER FOUND"'
-                    }
+                    echo "Deploying delta"
+                    sh 'sfdx force:source:deploy -u ${SF_USERNAME_DEV} -x package/package.xml '
+                    echo "Deploying delta"
+                    sh 'sfdx force:mdapi:deploy -u ${SF_USERNAME_DEV} -d destructiveChanges  --ignorewarnings'
+                   
+                    
+                        sh 'echo "###DONE!!"'
+                   
                 }
                 sh 'sfdx force:org:display -u ${SF_USERNAME_DEV}'
                 sh 'echo "sf.username=${SF_USERNAME_DEV}\n" > build.properties'
