@@ -1,13 +1,13 @@
 pipeline {
     agent {                                                             
-        label 'SFBLD'
+        label 'localAgent'
     }
     environment {
         SF_USERNAME_DEV = 'daniel-8299053017-25@industryapps.com'
-        PRIVATE_KEY = credentials('SERVER_KEY_CREDENTALS_ID')
-        CLIENT_ID_DEV = credentials('SF_CLIENT_ID_DEV')
+        PRIVATE_KEY = credentials('SERVER_KEY_ID')
+        CLIENT_ID_DEV = credentials('SF_CLIENT_ID_VLOCITY')
         SF_LOGIN_QA = 'https://login.salesforce.com'
-        SF_DEV_PSW = credentials('SF_LOGIN_DEV_PSW')
+        SF_DEV_PSW = credentials('SF_LOGIN_VLOCITY_PSW')
     }
     options {
         disableConcurrentBuilds()

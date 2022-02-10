@@ -1,6 +1,6 @@
 pipeline {
     agent {                                                             
-        label 'SFBLD'
+        label 'localAgent'
     }
     environment {
         SF_USERNAME_DEV = 'daniel-8299053017-25@industryapps.com'
